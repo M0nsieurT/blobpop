@@ -3,6 +3,8 @@ name: Build Android APK
 on:
   push:
     branches: [ "main", "master" ]
+    tags:
+      - "v*.*.*"
   pull_request:
     branches: [ "main", "master" ]
   workflow_dispatch:
@@ -10,6 +12,8 @@ on:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout du code
@@ -25,3 +29,14 @@ jobs:
           name: blobpop-release-apk
           path: target/android-artifacts/release/apk/blobpop.apk
           if-no-files-found: error
+
+      - name: Publier la Release GitHub
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: target/android-artifacts/release/apk/blobpop.apk
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
