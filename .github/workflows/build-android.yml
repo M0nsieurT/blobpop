@@ -1,0 +1,27 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Build de l'APK via Docker
+        run: |
+          docker run --rm -v "${{ github.workspace }}:/root/src" -w /root/src notfl3/cargo-apk cargo quad-apk build --release
+
+      - name: Sauvegarder l'APK en tant qu'Artifact GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: blobpop-release-apk
+          path: target/android-artifacts/release/apk/blobpop.apk
+          if-no-files-found: error
