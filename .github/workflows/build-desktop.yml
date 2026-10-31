@@ -32,13 +32,13 @@ jobs:
             binary_name: blobpop
             cmd: tar
 
-          - os: macos-14 # Runner Apple Silicon (M1/M2/M3)
+          - os: macos-15 # Apple Silicon (ARM64)
             target: aarch64-apple-darwin
             artifact_name: blobpop-macos-arm64.tar.gz
             binary_name: blobpop
             cmd: tar
 
-          - os: macos-13 # Runner Intel
+          - os: macos-15 # Cross-compilation Intel depuis runner Apple Silicon
             target: x86_64-apple-darwin
             artifact_name: blobpop-macos-x64.tar.gz
             binary_name: blobpop
@@ -46,7 +46,7 @@ jobs:
 
     steps:
       - name: Checkout du code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Installation des dépendances Linux (OpenGL / ALSA / X11)
         if: runner.os == 'Linux'
@@ -77,7 +77,7 @@ jobs:
           tar -czvf ${{ matrix.job.artifact_name }} -C target/${{ matrix.job.target }}/release/ ${{ matrix.job.binary_name }}
 
       - name: Sauvegarder l'Artifact GitHub
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.job.artifact_name }}
           path: ${{ matrix.job.artifact_name }}
