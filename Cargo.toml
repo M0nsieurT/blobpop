@@ -1,6 +1,6 @@
 [package]
 name = "blobpop"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 [lib]
@@ -8,12 +8,16 @@ name = "blobpop"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-macroquad = "=0.4.13"
+macroquad = { version = "=0.4.13", features = ["audio"] }
 
 [package.metadata.android]
 package_name = "fr.julientissier.blobpop"
 label = "Blob Pop"
 assets = "assets"
 build_targets = ["aarch64-linux-android"]
+android_version = 33
+target_sdk_version = 33
 min_sdk_version = 21
-target_sdk_version = 29
+
+[package.metadata.android.activity_attributes]
+"android:exported" = "true"

@@ -1,0 +1,23 @@
+services:
+  builder:
+    image: notfl3/cargo-apk
+    volumes:
+      - .:/root/src
+      - android-sdk-platforms:/opt/android-sdk-linux/platforms
+    working_dir: /root/src
+    command: bash -c "yes | /opt/android-sdk-linux/tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux 'platforms;android-33' && cargo quad-apk build --release"
+
+  fast:
+    image: notfl3/cargo-apk
+    volumes:
+      - .:/root/src
+      - android-sdk-platforms:/opt/android-sdk-linux/platforms
+      - cargo-cache:/usr/local/cargo
+      - cargo-target-cache:/root/src/target
+    working_dir: /root/src
+    command: cargo quad-apk build --release
+
+volumes:
+  android-sdk-platforms:
+  cargo-cache:
+  cargo-target-cache:

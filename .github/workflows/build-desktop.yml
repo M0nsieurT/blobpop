@@ -1,0 +1,95 @@
+name: Build Desktop (Windows, Linux, macOS)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    tags:
+      - "v*.*.*"
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-desktop:
+    name: Build (${{ matrix.job.target }})
+    runs-on: ${{ matrix.job.os }}
+    permissions:
+      contents: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        job:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: blobpop-windows-x64.zip
+            binary_name: blobpop.exe
+            cmd: compress
+
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: blobpop-linux-x64.tar.gz
+            binary_name: blobpop
+            cmd: tar
+
+          - os: macos-14 # Runner Apple Silicon (M1/M2/M3)
+            target: aarch64-apple-darwin
+            artifact_name: blobpop-macos-arm64.tar.gz
+            binary_name: blobpop
+            cmd: tar
+
+          - os: macos-13 # Runner Intel
+            target: x86_64-apple-darwin
+            artifact_name: blobpop-macos-x64.tar.gz
+            binary_name: blobpop
+            cmd: tar
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Installation des dépendances Linux (OpenGL / ALSA / X11)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-dev libxi-dev libgl1-mesa-dev libasound2-dev
+
+      - name: Installer la toolchain Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.job.target }}
+
+      - name: Mettre en cache les dépendances Cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build binaire Release
+        run: cargo build --release --target ${{ matrix.job.target }}
+
+      - name: Empaqueter l'exécutable (Windows ZIP)
+        if: matrix.job.cmd == 'compress'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path target/${{ matrix.job.target }}/release/${{ matrix.job.binary_name }} -DestinationPath ${{ matrix.job.artifact_name }}
+
+      - name: Empaqueter l'exécutable (Linux / macOS TAR.GZ)
+        if: matrix.job.cmd == 'tar'
+        run: |
+          tar -czvf ${{ matrix.job.artifact_name }} -C target/${{ matrix.job.target }}/release/ ${{ matrix.job.binary_name }}
+
+      - name: Sauvegarder l'Artifact GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.job.artifact_name }}
+          path: ${{ matrix.job.artifact_name }}
+          if-no-files-found: error
+
+      - name: Publier sur la Release GitHub
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.job.artifact_name }}
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
