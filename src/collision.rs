@@ -1,4 +1,4 @@
-use crate::audio::play_merge_sound;
+use crate::audio::play_merge;
 use crate::blob::{random_blob_val, update_queue_target_positions, Blob};
 use macroquad::audio::Sound;
 use macroquad::prelude::*;
@@ -90,9 +90,8 @@ pub fn check_queue_merges(
                 && queue_blobs[idx_b].is_arrived
             {
                 let merged_val = queue_blobs[idx_a].value * 2;
-                play_merge_sound(merge_sounds, merged_val);
+                play_merge(merge_sounds, merged_val);
 
-                // Addition des valeurs non fusionnées
                 let points_a = if queue_blobs[idx_a].is_fused_result { 0 } else { queue_blobs[idx_a].value };
                 let points_b = if queue_blobs[idx_b].is_fused_result { 0 } else { queue_blobs[idx_b].value };
                 *score += points_a + points_b;
@@ -143,9 +142,8 @@ pub fn handle_collisions(
             if dist < visual_contact {
                 if launched_blob.value == queue_b.value {
                     let merged_val = queue_b.value * 2;
-                    play_merge_sound(merge_sounds, merged_val);
+                    play_merge(merge_sounds, merged_val);
 
-                    // Si un blob est DÉJÀ issu d'une fusion, sa contribution vaut 0
                     let points_launched = if launched_blob.is_fused_result { 0 } else { launched_blob.value };
                     let points_queue = if queue_b.is_fused_result { 0 } else { queue_b.value };
                     *score += points_launched + points_queue;
@@ -184,9 +182,8 @@ pub fn handle_collisions(
                 if dist < visual_contact {
                     if blobs[i].value == blobs[j].value {
                         let merged_val = blobs[i].value * 2;
-                        play_merge_sound(merge_sounds, merged_val);
+                        play_merge(merge_sounds, merged_val);
 
-                        // Seuls les blobs jamais fusionnés ajoutent leurs points
                         let points_i = if blobs[i].is_fused_result { 0 } else { blobs[i].value };
                         let points_j = if blobs[j].is_fused_result { 0 } else { blobs[j].value };
                         *score += points_i + points_j;
