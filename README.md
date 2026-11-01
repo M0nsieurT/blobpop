@@ -42,17 +42,25 @@ La méthode recommandée utilise Docker pour éviter la gestion manuelle du SDK/
 
 #### Compilation de l'APK :
 
-À la racine du projet, exécutez dans votre terminal (PowerShell / Bash) :
+À la racine du projet, lancez la compilation via **Docker Compose** :
 
-```powershell
-docker run --rm -v "${PWD}:/root/src" -w /root/src notfl3/cargo-apk bash -c "yes | /opt/android-sdk-linux/tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux 'platforms;android-33' && cargo quad-apk build --release"
+```bash
+docker compose up builder
 ```
 
-**Note** : Si le SDK Android 33 est déjà téléchargé dans le conteneur, vous pouvez utiliser la commande raccourcie :
+**Note** : Le service `builder` s'assure d'installer la plateforme `platforms;android-33` requise dans le volume Docker avant de lancer la compilation.
+
+<details>
+<summary>Alternative via commande Docker directe</summary>
+
+Si vous préférez exécuter la commande sans Docker Compose :
 
 ```powershell
-docker run --rm -v "${PWD}:/root/src" -w /root/src notfl3/cargo-apk cargo quad-apk build --release
+docker run --rm -v "${PWD}:/root/src" -w /root/src notfl3/cargo-apk \
+  bash -c "yes | /opt/android-sdk-linux/tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux 'platforms;android-33' \
+  && cargo quad-apk build --release"
 ```
+</details>
 
 L'APK compilé sera généré dans :
 `target/android-artifacts/release/apk/blobpop.apk`

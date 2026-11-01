@@ -21,7 +21,12 @@ jobs:
 
       - name: Build de l'APK via Docker
         run: |
-          docker run --rm -v "${{ github.workspace }}:/root/src" -w /root/src notfl3/cargo-apk cargo quad-apk build --release
+          docker run --rm \
+            -v "${{ github.workspace }}:/root/src" \
+            -w /root/src \
+            notfl3/cargo-apk \
+            bash -c "yes | /opt/android-sdk-linux/tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux 'platforms;android-33' \
+            && cargo quad-apk build --release"
 
       - name: Sauvegarder l'APK en tant qu'Artifact GitHub
         uses: actions/upload-artifact@v4

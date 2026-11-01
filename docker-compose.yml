@@ -13,11 +13,11 @@ services:
       - .:/root/src
       - android-sdk-platforms:/opt/android-sdk-linux/platforms
       - cargo-cache:/usr/local/cargo
-      - cargo-target-cache:/root/src/target
+      - cargo-target-deps:/root/src/target/release/deps
     working_dir: /root/src
     command: cargo quad-apk build --release
 
 volumes:
   android-sdk-platforms:
   cargo-cache:
-  cargo-target-cache:
+  cargo-target-deps:
